@@ -11,10 +11,6 @@ def run(argv=None):
 
     """Main entry point; defines and runs the wordcount pipeline."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('--project',
-                        dest='project',
-                        required=True,
-                        help='Project ID provided.')
     parser.add_argument('--input',
                         dest='input',
                         required=True,
@@ -33,12 +29,12 @@ def run(argv=None):
                         dest='subscription',
                         required=True,
                         help='Subscription for message.')
-    parser.add_argument('--entityType',
-                        dest='entityType',
+    parser.add_argument('--entity_type',
+                        dest='entity_type',
                         required=True,
                         help='Entity Type for message.')
-    parser.add_argument('--eventType',
-                        dest='eventType',
+    parser.add_argument('--event_type',
+                        dest='event_type',
                         required=True,
                         help='Event Type for message.')                        
     parser.add_argument('--outputFilenamePrefix',
@@ -54,10 +50,10 @@ def run(argv=None):
 
     # We use the save_main_session option because one or more DoFn's in this
     # workflow rely on global context (e.g., a module imported at module level).
-    pipelineoptions = PipelineOptions(pipeline_args)
-    pipelineoptions.view_as(SetupOptions).save_main_session = True
-    pipelineoptions.view_as(StandardOptions).streaming=True
-    p = beam.Pipeline(options=pipelineoptions)
+    pipeline_options = PipelineOptions(pipeline_args)
+    pipeline_options.view_as(SetupOptions).save_main_session = True
+    pipeline_options.view_as(StandardOptions).streaming=True
+    p = beam.Pipeline(options=pipeline_options)
     
 
     print(known_args.output + known_args.outputFilenamePrefix)
