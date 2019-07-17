@@ -69,7 +69,9 @@ def run(argv=None):
     
     data = (message 
                 | beam.WindowInto(window.FixedWindows(120,0))
-                | beam.io.WriteToJson(known_args.output + known_args.outputFilenamePrefix, file_name_suffix=known_args.outputFilenameSuffix))
+                | beam.io.WriteToText(known_args.output + known_args.outputFilenamePrefix, 
+                                    file_name_suffix=known_args.outputFilenameSuffix,
+                                    num_shards=1))
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
