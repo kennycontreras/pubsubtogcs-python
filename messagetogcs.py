@@ -2,11 +2,10 @@ import apache_beam as beam
 import argparse
 import logging
 import apache_beam.transforms.window as window
+from apache_beam.io.gcp.pubsub import ReadFromPubSub
 from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.options.pipeline_options import SetupOptions
 from apache_beam.options.pipeline_options import StandardOptions
-from apache_beam.io.textio import ReadFromPubSub, WriteToText
-
 
 def run(argv=None):
 
@@ -58,18 +57,21 @@ def run(argv=None):
 
     if known_args.subscription:
         messages = (p 
-                | beam.io.ReadFromPubSub(subscription=known_args.subscription)
+                | ReadFromPubSub(subscription=known_args.subscription, with_attributes=True)
                 .with_output_types(bytes))
     else:
         messages = (p 
-                | beam.io.ReadFromPubSub(subscription=known_args.topic)
+                | ReadFromPubSub(subscription=known_args.topic, with_attributes=True)
                 .with_output_types(bytes))
-    
-    lines = messages | 'decode' >> beam.Map(lambda x: x.decode('utf-8'))
 
-    data = (lines 
-                | beam.WindowInto(window.FixedWindows(120,0))
-                | beam.io.WriteToText(known_args.output + known_args.outputFilenamePrefix, 
+
+    def printattr(msg):
+        print(msg.attributes)
+
+    (messages 
+            | "Print Attributes" >> beam.Map(printattr)
+            | beam.WindowInto(window.FixedWindows(120,0))
+            | beam.io.WriteToText(known_args.output + known_args.outputFilenamePrefix, 
                                     file_name_suffix=known_args.outputFilenameSuffix,
                                     num_shards=1))
 
