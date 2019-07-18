@@ -5,6 +5,7 @@ import apache_beam.transforms.window as window
 from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.options.pipeline_options import SetupOptions
 from apache_beam.options.pipeline_options import StandardOptions
+from apache_beam.io.textio import ReadFromPubSub, WriteToText
 
 
 def run(argv=None):
@@ -52,26 +53,28 @@ def run(argv=None):
     # workflow rely on global context (e.g., a module imported at module level).
     pipeline_options = PipelineOptions(pipeline_args)
     pipeline_options.view_as(SetupOptions).save_main_session = True
-    pipeline_options.view_as(StandardOptions).streaming=True
+    pipeline_options.view_as(StandardOptions).streaming= True
     p = beam.Pipeline(options=pipeline_options)
-    
-
-    print(known_args.output + known_args.outputFilenamePrefix)
 
     if known_args.subscription:
-        message = (p 
+        messages = (p 
                 | beam.io.ReadFromPubSub(subscription=known_args.subscription)
                 .with_output_types(bytes))
     else:
-        message = (p 
+        messages = (p 
                 | beam.io.ReadFromPubSub(subscription=known_args.topic)
                 .with_output_types(bytes))
     
-    data = (message 
+    lines = messages | 'decode' >> beam.Map(lambda x: x.decode('utf-8'))
+
+    data = (lines 
                 | beam.WindowInto(window.FixedWindows(120,0))
                 | beam.io.WriteToText(known_args.output + known_args.outputFilenamePrefix, 
                                     file_name_suffix=known_args.outputFilenameSuffix,
                                     num_shards=1))
+
+    result = p.run()
+    result.wait_until_finish()
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
