@@ -57,13 +57,10 @@ def run(argv=None):
 
     if known_args.subscription:
         messages = (p 
-                | ReadFromPubSub(subscription=known_args.subscription, with_attributes=True)
-                .with_output_types(bytes))
+                | ReadFromPubSub(subscription=known_args.subscription, with_attributes=True))
     else:
         messages = (p 
-                | ReadFromPubSub(subscription=known_args.topic, with_attributes=True)
-                .with_output_types(bytes))
-
+                | ReadFromPubSub(subscription=known_args.topic, with_attributes=True))
 
     def printattr(msg):
         print(msg.attributes)
@@ -81,9 +78,3 @@ def run(argv=None):
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
     run()
-
-
-
-
-
-

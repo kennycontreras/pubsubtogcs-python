@@ -16,7 +16,7 @@ python -m messagetogcs \
 --entity_type price \
 --event_type priceUpdated \
 --outputFilenamePrefix windowed-file \
---outputFilenameSuffix .json \ 
+--outputFilenameSuffix .json 
 
 
 
